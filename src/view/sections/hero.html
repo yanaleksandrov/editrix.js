@@ -1,0 +1,59 @@
+<section class="hero">
+  <div class="hero__wrapper wrapper">
+    <% if (hero.instruction) { %>
+      <div class="hero__instruction">
+        <%= hero.instruction.iconBefore %>
+        <%= hero.instruction.text %>
+        <%= hero.instruction.iconAfter %>
+      </div>
+    <% } %>
+
+    <% if (hero.caption) { %>
+    <div class="hero__caption">
+      <%= hero.caption.iconBefore %>
+      <%= hero.caption.text %>
+      <%= hero.caption.iconAfter %>
+    </div>
+    <% } %>
+
+    <% if (hero.title) { %>
+      <h1 class="hero__title"><%= hero.title %></h1>
+    <% } %>
+
+    <% if (hero.description) { %>
+    <div class="hero__description"><%= hero.description %></div>
+    <% } %>
+
+    <% if (hero.buttons) { %>
+    <div class="hero__buttons">
+      <% hero.buttons.forEach( button => { %>
+       <a href="<%= button.link %>" class="btn btn--<%= button.type %>"><%= button.text %> <%= button.icon %></a>
+      <% }); %>
+    </div>
+    <% } %>
+
+    <% if (hero.subscribe) { %>
+    <div class="hero__subscribe">
+      <input placeholder="<%= hero.subscribe %>">
+    </div>
+    <% } %>
+
+    <% if (hero.logotypes) { %>
+    <div class="hero__logotypes">
+      <% hero.logotypes.forEach( logotype => { %>
+        <a href="<%= logotype.link %>" class="hero__logotype">
+          <img src="<%= logotype.image %>" class="hero__logotype-image" alt="">
+        </a>
+      <% }); %>
+    </div>
+    <% } %>
+
+    <% if (hero.users.avatars) { %>
+      <div class="hero__team">
+        <% hero.users.avatars.forEach( avatar => { %>
+          <img src="<%= avatar %>" alt="">
+        <% }); %>
+      </div>
+    <% } %>
+  </div>
+</section>
