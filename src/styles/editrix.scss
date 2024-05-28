@@ -20,23 +20,6 @@ body {
 	-webkit-user-drag: element;
 }
 
-.sb-dragging-start {
-	opacity: 0.4;
-}
-
-.sb-dragging-over {
-
-	&:after {
-		content: '';
-		position: absolute;
-		height: 4px;
-		background-color: #ea6b3387;
-		left: 0;
-		right: 0;
-		top: -2px;
-	}
-}
-
 .editrix {
 	position: relative;
 	min-height: 100dvh;
@@ -275,14 +258,52 @@ body {
 
 .editrix-container {
 	$tools-color: #f3bafd;
-	padding: 0 calc(50% - 400px);
+	$max-width: 800px;
+
+	padding: 0 calc(50% - (#{$max-width} / 2));
 	transition: border 0.15s;
 	border: 1px solid transparent;
 	position: relative;
-	min-height: 1em;
+	min-height: 5em;
 
 	&:hover {
 		border: 1px solid $tools-color;
+	}
+
+	&.editrix-dragging-start {
+		opacity: 0.4;
+
+		&.editrix-dragging-over {
+			content: none !important;
+		}
+	}
+
+	&.editrix-dragging-over {
+
+		&:after {
+			position: absolute;
+			height: 4px;
+			background-color: $tools-color;
+			left: 0;
+			right: 0;
+		}
+
+		&.editrix-dragging-top:after {
+			content: '';
+			top: -2px;
+		}
+
+		&.editrix-dragging-bottom:after {
+			content: '';
+			bottom: -2px;
+		}
+	}
+
+	&.editrix-dragging-start.editrix-dragging-over {
+
+		&:after {
+			content: none;
+		}
 	}
 
 	&-tools {

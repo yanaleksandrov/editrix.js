@@ -1,7 +1,10 @@
 import { directive } from '../directives';
 
-let dragElement       = null;
-let dragElementBounds = null;
+let dragElements          = [];
+let dragElement           = null;
+let dragElementStartIndex = null;
+let dragElementOverIndex  = null;
+let dragElementBounds     = null;
 
 directive('drag', (el, expression, attribute, x, component) => {
   el.draggable      = true;
@@ -13,10 +16,14 @@ directive('drag', (el, expression, attribute, x, component) => {
     'dragleave': handleDragLeave,
     'drop': handleDrop,
     'dragend': handleDragEnd,
-    'mouseover': handleMouseOver,
-    'mouseleave': handleMouseOut,
+    'mouseenter': handleMouseEnter,
+    'mouseleave': handleMouseLeave,
   })) {
     el.addEventListener(event, callback, false);
+  }
+
+  if (el.__x_attributes === '') {
+    dragElements.push(el);
   }
 
   /**
@@ -32,17 +39,22 @@ directive('drag', (el, expression, attribute, x, component) => {
       element.classList.add('editrix-container');
       element.setAttribute('x-drag', '');
 
-      element.draggable = true;
-      element.innerHTML = getTpl(el.__x_attributes);
+      element.draggable      = true;
+      element.innerHTML      = getTpl(el.__x_attributes);
+      element.__x_attributes = '';
+
+      element.addEventListener('mouseenter', handleMouseEnter);
+      element.addEventListener('mouseleave', handleMouseLeave);
     }
 
-    dragElement       = element;
-    dragElementBounds = element.getBoundingClientRect();
+    dragElement           = element;
+    dragElementStartIndex = dragElements.indexOf(element);
+    dragElementBounds     = element.getBoundingClientRect();
 
     e.dataTransfer.effectAllowed = 'move';
     e.dataTransfer.setData('text/html', element.outerHTML);
 
-    element.classList.add('sb-dragging-start');
+    element.classList.add('editrix-dragging-start');
   }
 
   /**
@@ -55,9 +67,20 @@ directive('drag', (el, expression, attribute, x, component) => {
     if (e.preventDefault) {
       e.preventDefault(); // Necessary. Allows us to drop.
     }
-    el.classList.add('sb-dragging-over');
+    el.classList.add('editrix-dragging-over');
+
+    dragElementOverIndex = dragElements.indexOf(el);
 
     e.dataTransfer.dropEffect = 'move'; // See the section on the DataTransfer object.
+
+    if (dragElementStartIndex && dragElementOverIndex) {
+      el.classList.toggle('editrix-dragging-top', dragElementStartIndex > dragElementOverIndex);
+      el.classList.toggle('editrix-dragging-bottom', dragElementStartIndex < dragElementOverIndex);
+
+      if (dragElementStartIndex === dragElementOverIndex) {
+        el.classList.remove('editrix-dragging-top', 'editrix-dragging-bottom');
+      }
+    }
 
     return false;
   }
@@ -68,7 +91,7 @@ directive('drag', (el, expression, attribute, x, component) => {
    * @param e
    */
   function handleDragLeave(e) {
-    el.classList.remove('sb-dragging-over');
+    el.classList.remove('editrix-dragging-over');
   }
 
   /**
@@ -89,9 +112,9 @@ directive('drag', (el, expression, attribute, x, component) => {
 
         el.insertAdjacentElement(dragElementBounds.top > top ? 'beforebegin' : 'afterend', dragElement);
       }
-      el.classList.remove('sb-dragging-start', 'sb-dragging-over');
+      el.classList.remove('editrix-dragging-start', 'editrix-dragging-over');
 
-      dragElement.classList.remove('sb-dragging-start', 'sb-dragging-over');
+      dragElement.classList.remove('editrix-dragging-start', 'editrix-dragging-over');
     }
     return false;
   }
@@ -102,7 +125,7 @@ directive('drag', (el, expression, attribute, x, component) => {
    * @param e
    */
   function handleDragEnd(e) {
-    el.classList.remove('sb-dragging-start', 'sb-dragging-over');
+    el.classList.remove('editrix-dragging-start', 'editrix-dragging-over');
   }
 
   /**
@@ -110,11 +133,11 @@ directive('drag', (el, expression, attribute, x, component) => {
    *
    * @param e
    */
-  function handleMouseOver(e) {
-    if (el.__x_attributes === '') {
-      let tools = el.querySelector('.editrix-container-tools');
+  function handleMouseEnter({target}) {
+    if (target.__x_attributes === '') {
+      let tools = target.querySelector('.editrix-container-tools');
       if (!tools) {
-        el.insertAdjacentHTML('afterbegin', `
+        target.insertAdjacentHTML('afterbegin', `
         <ul class="editrix-container-tools">
           <li class="editrix-container-tools-item" title="Edit Container">
             <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 256 256">
@@ -137,9 +160,9 @@ directive('drag', (el, expression, attribute, x, component) => {
    *
    * @param e
    */
-  function handleMouseOut(e) {
-    if (el.__x_attributes === '') {
-      let tools = el.querySelector('.editrix-container-tools');
+  function handleMouseLeave({target}) {
+    if (target.__x_attributes === '') {
+      let tools = target.querySelector('.editrix-container-tools');
       if (tools) {
         tools.remove();
       }
