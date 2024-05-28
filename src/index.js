@@ -19,6 +19,5 @@ import './scripts/directives/x-show';
 import './scripts/directives/x-cloak';
 
 import './scripts/directives/x-drag';
-import './scripts/directives/x-dropzone';
 
 window.editrix.start();
