@@ -138,7 +138,6 @@ directive('drag', (el, expression, attribute, x, component) => {
    * @param e
    */
   function handleMouseOut(e) {
-    console.log(e.target)
     if (el.__x_attributes === '') {
       let tools = el.querySelector('.editrix-container-tools');
       if (tools) {
