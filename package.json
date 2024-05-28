@@ -9,9 +9,10 @@
   },
   "license": "MIT",
   "dependencies": {
-    "normalize.css": "^8.0.1"
+    "normalize.css": "^8.0.1",
+    "sortablejs": "^1.15.2"
   },
-  "browserslist":  [
+  "browserslist": [
     "last 4 versions",
     "> 0.5%",
     "Firefox ESR",

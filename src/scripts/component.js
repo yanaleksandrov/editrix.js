@@ -92,7 +92,7 @@ export default class Component {
 
           }
 
-          editrix.directives[directive](el, output, attribute, x, self);
+          editrix.directives[directive](el, output, attribute, editrix, self);
         }
       })
     })
