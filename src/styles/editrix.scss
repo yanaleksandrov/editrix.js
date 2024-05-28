@@ -10,6 +10,33 @@ body {
 	display: none;
 }
 
+[draggable] {
+	-moz-user-select: none;
+	-khtml-user-select: none;
+	-webkit-user-select: none;
+	user-select: none;
+	/* Required to make elements draggable in old WebKit */
+	-khtml-user-drag: element;
+	-webkit-user-drag: element;
+}
+
+.sb-dragging-start {
+	opacity: 0.4;
+}
+
+.sb-dragging-over {
+
+	&:after {
+		content: '';
+		position: absolute;
+		height: 4px;
+		background-color: #ea6b3387;
+		left: 0;
+		right: 0;
+		top: -2px;
+	}
+}
+
 .editrix {
 	position: relative;
 	min-height: 100dvh;
@@ -217,9 +244,8 @@ body {
 
 	&__preview {
 		flex: 1;
+		padding-top: 24px;
 		min-height: 100dvh;
-		padding: 32px;
-		background-color: #f8f8f8;
 	}
 
 	&__item {
@@ -235,7 +261,6 @@ body {
 		user-select: none;
 		cursor: pointer;
 		border-radius: 5px;
-		float: left;
 		transition: background-color 0.3s;
 
 		&:hover {
@@ -244,6 +269,79 @@ body {
 
 		* {
 			pointer-events: none;
+		}
+	}
+}
+
+.editrix-container {
+	$tools-color: #f3bafd;
+	padding: 0 calc(50% - 400px);
+	transition: border 0.15s;
+	border: 1px solid transparent;
+	position: relative;
+	min-height: 32px;
+
+	&:hover {
+		border: 1px solid $tools-color;
+	}
+
+	&-tools {
+		position: absolute;
+		top: -22px;
+		left: 0;
+		right: 0;
+		margin: 0 auto;
+		padding: 0;
+		display: flex;
+		list-style: none;
+		font-size: 12px;
+		width: fit-content;
+
+		&:before,
+		&:after {
+			content: '';
+			position: absolute;
+			top: 2px;
+			border-block-start: 20px solid transparent;
+			border-block-end: 0 none transparent;
+			transition: all .15s;
+		}
+
+		&:before {
+			right: calc(100% - 1px);
+			border-inline-start: 0 none transparent;
+			border-inline-end: 12px solid $tools-color;
+		}
+
+		&:after {
+			left: calc(100% - 1px);
+			border-inline-start: 12px solid $tools-color;
+			border-inline-end: 0 none transparent;
+		}
+	}
+
+	&-tools-item {
+		padding: 0 5px;
+		height: 22px;
+		width: 22px;
+		cursor: pointer;
+		transition: background-color 0.15s;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		text-align: center;
+		background-color: $tools-color;
+
+		&:hover {
+			background-color: darken($tools-color, 5%);
+		}
+
+		&:first-child {
+			border-start-start-radius: 5px;
+		}
+
+		&:last-child {
+			border-start-end-radius: 5px;
 		}
 	}
 }

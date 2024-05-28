@@ -1,8 +1,8 @@
-import { eventCreate, getAttributes, isInputField, saferEval, isEmpty } from './utils';
+import { getAttributes, isInputField, saferEval, isEmpty } from './utils';
 import { domWalk } from './dom';
 
 export function fetchProps(rootElement, data) {
-  const fetched = [];
+  let fetched = [];
   domWalk(rootElement, el => {
     getAttributes(el).forEach(attribute => {
       let {modifiers, prop, name} = attribute;

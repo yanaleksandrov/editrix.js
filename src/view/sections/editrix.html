@@ -65,7 +65,7 @@
           Patterns
         </div>
       </div>
-      <div class="editrix__tab-content" id="editrix-elements" x-show="tabGlobal === 'elements'">
+      <div class="editrix__tab-content" x-show="tabGlobal === 'elements'">
         <div class="editrix__item" x-drag="editrix-text">
           <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="#000000" viewBox="0 0 256 256"><path d="M112,44a4,4,0,0,0-4,4V68H24A12,12,0,0,0,12,80v96a12,12,0,0,0,12,12h84v20a4,4,0,0,0,8,0V48A4,4,0,0,0,112,44ZM24,180a4,4,0,0,1-4-4V80a4,4,0,0,1,4-4h84V180ZM244,80v96a12,12,0,0,1-12,12H144a4,4,0,0,1,0-8h88a4,4,0,0,0,4-4V80a4,4,0,0,0-4-4H144a4,4,0,0,1,0-8h88A12,12,0,0,1,244,80ZM84,112a4,4,0,0,1-4,4H68v28a4,4,0,0,1-8,0V116H48a4,4,0,0,1,0-8H80A4,4,0,0,1,84,112Z"></path></svg>
           Text
@@ -80,9 +80,15 @@
       </div>
     </div>
   </div>
-  <div class="editrix__preview" id="editrix-preview" x-drop>
-    <div class="grfm" style="padding: 32px; background-color: #f1f1f1;">
-      Hello World!
+  <div class="editrix__preview">
+    <div class="editrix-container" x-drag>
+      Hello World! 1111
+    </div>
+    <div class="editrix-container" x-drag>
+      Hello World! 2222
+    </div>
+    <div class="editrix-container" x-drag>
+      Hello World! 33333
     </div>
   </div>
 </div>

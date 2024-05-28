@@ -41,7 +41,7 @@ export function getAttributes(el) {
       event: startsWith === '@' ? parts[0] : '',
       expression: value,
       prop: startsWith === 'x.' ? parts[0] : '',
-      modifiers: startsWith === 'x.' ? parts.slice(1) : root.split('.').slice(1)
+      modifiers: startsWith === 'x.' ? parts.slice(1) : parts.slice(1)
     }
   });
 }
