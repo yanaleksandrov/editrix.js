@@ -1,14 +1,19 @@
 import { directive } from '../directives';
 
-let dragElements          = [];
-let dragElement           = null;
-let dragElementStartIndex = null;
-let dragElementOverIndex  = null;
-let dragElementBounds     = null;
+let dragElements          = [],
+    dragElement           = null,
+    dragElementStartIndex = null,
+    dragElementOverIndex  = null,
+    dragElementBounds     = null;
+
+let draggingStartClass  = 'editrix-dragging-start',
+    draggingOverClass   = 'editrix-dragging-over',
+    draggingTopClass    = 'editrix-dragging-top',
+    draggingBottomClass = 'editrix-dragging-bottom';
 
 directive('drag', (el, expression, attribute, x, component) => {
-  el.draggable      = true;
-  el.__x_attributes = attribute.expression
+  el.draggable    = true;
+  el.__x_block_id = attribute.expression
 
   for (let [event, callback] of Object.entries({
     'dragstart': handleDragStart,
@@ -22,7 +27,7 @@ directive('drag', (el, expression, attribute, x, component) => {
     el.addEventListener(event, callback, false);
   }
 
-  if (el.__x_attributes === '') {
+  if (el.__x_block_id === '') {
     dragElements.push(el);
   }
 
@@ -33,15 +38,15 @@ directive('drag', (el, expression, attribute, x, component) => {
    */
   function handleDragStart(e) {
     let element = el;
-    if (el.__x_attributes !== '') {
+    if (el.__x_block_id !== '') {
       element = document.createElement('div');
 
       element.classList.add('editrix-container');
       element.setAttribute('x-drag', '');
 
-      element.draggable      = true;
-      element.innerHTML      = getTpl(el.__x_attributes);
-      element.__x_attributes = '';
+      element.draggable    = true;
+      element.innerHTML    = getTpl(el.__x_block_id);
+      element.__x_block_id = '';
 
       element.addEventListener('mouseenter', handleMouseEnter);
       element.addEventListener('mouseleave', handleMouseLeave);
@@ -54,7 +59,7 @@ directive('drag', (el, expression, attribute, x, component) => {
     e.dataTransfer.effectAllowed = 'move';
     e.dataTransfer.setData('text/html', element.outerHTML);
 
-    element.classList.add('editrix-dragging-start');
+    element.classList.add(draggingStartClass);
   }
 
   /**
@@ -67,18 +72,18 @@ directive('drag', (el, expression, attribute, x, component) => {
     if (e.preventDefault) {
       e.preventDefault(); // Necessary. Allows us to drop.
     }
-    el.classList.add('editrix-dragging-over');
+    el.classList.add(draggingOverClass);
 
     dragElementOverIndex = dragElements.indexOf(el);
 
     e.dataTransfer.dropEffect = 'move'; // See the section on the DataTransfer object.
 
-    if (dragElementStartIndex && dragElementOverIndex) {
-      el.classList.toggle('editrix-dragging-top', dragElementStartIndex > dragElementOverIndex);
-      el.classList.toggle('editrix-dragging-bottom', dragElementStartIndex < dragElementOverIndex);
+    if (dragElementStartIndex !== null && dragElementOverIndex !== null) {
+      el.classList.toggle(draggingTopClass, dragElementStartIndex > dragElementOverIndex);
+      el.classList.toggle(draggingBottomClass, dragElementStartIndex < dragElementOverIndex);
 
       if (dragElementStartIndex === dragElementOverIndex) {
-        el.classList.remove('editrix-dragging-top', 'editrix-dragging-bottom');
+        el.classList.remove(draggingTopClass, draggingBottomClass);
       }
     }
 
@@ -91,7 +96,7 @@ directive('drag', (el, expression, attribute, x, component) => {
    * @param e
    */
   function handleDragLeave(e) {
-    el.classList.remove('editrix-dragging-over');
+    el.classList.remove(draggingOverClass, draggingTopClass, draggingBottomClass);
   }
 
   /**
@@ -112,9 +117,9 @@ directive('drag', (el, expression, attribute, x, component) => {
 
         el.insertAdjacentElement(dragElementBounds.top > top ? 'beforebegin' : 'afterend', dragElement);
       }
-      el.classList.remove('editrix-dragging-start', 'editrix-dragging-over');
+      el.classList.remove(draggingStartClass, draggingOverClass, draggingTopClass, draggingBottomClass);
 
-      dragElement.classList.remove('editrix-dragging-start', 'editrix-dragging-over');
+      dragElement.classList.remove(draggingStartClass, draggingOverClass, draggingTopClass, draggingBottomClass);
     }
     return false;
   }
@@ -125,7 +130,7 @@ directive('drag', (el, expression, attribute, x, component) => {
    * @param e
    */
   function handleDragEnd(e) {
-    el.classList.remove('editrix-dragging-start', 'editrix-dragging-over');
+    el.classList.remove(draggingStartClass, draggingOverClass);
   }
 
   /**
@@ -134,7 +139,7 @@ directive('drag', (el, expression, attribute, x, component) => {
    * @param e
    */
   function handleMouseEnter({target}) {
-    if (target.__x_attributes === '') {
+    if (target.__x_block_id === '') {
       let tools = target.querySelector('.editrix-container-tools');
       if (!tools) {
         target.insertAdjacentHTML('afterbegin', `
@@ -161,7 +166,7 @@ directive('drag', (el, expression, attribute, x, component) => {
    * @param e
    */
   function handleMouseLeave({target}) {
-    if (target.__x_attributes === '') {
+    if (target.__x_block_id === '') {
       let tools = target.querySelector('.editrix-container-tools');
       if (tools) {
         tools.remove();
