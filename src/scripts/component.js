@@ -9,8 +9,13 @@ export default class Component {
     injectDataProviders(dataProviderContext);
 
     this.root    = el;
-    this.rawData = saferEval(el.getAttribute('x-data') || '{}', dataProviderContext);
-    this.rawData = fetchProps(el, this.rawData);
+    //this.rawData = saferEval(el.getAttribute('x-data') || '{}', dataProviderContext);
+    //this.rawData = fetchProps(el, this.rawData);
+    this.rawData = fetchProps(el, {
+      section: 'blocks',
+      elementsTab: 'blocks',
+      contentTab: 'content',
+    });
     this.data    = this.wrapDataInObservable(this.rawData);
 
     this.initialize(el, this.data)

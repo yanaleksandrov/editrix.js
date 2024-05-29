@@ -1,7 +1,6 @@
 import { directive } from '../directives';
 
-let dragElements          = [],
-    dragElement           = null,
+let dragElement           = null,
     dragElementStartIndex = null,
     dragElementOverIndex  = null,
     dragElementBounds     = null;
@@ -13,7 +12,15 @@ let draggingStartClass  = 'editrix-dragging-start',
 
 directive('drag', (el, expression, attribute, x, component) => {
   el.draggable    = true;
-  el.__x_block_id = attribute.expression
+  el.__x_block_id = attribute.expression;
+
+  if (typeof component.data.blocks === 'undefined') {
+    component.data.blocks = [];
+  }
+
+  if (el.__x_block_id === '') {
+    component.data.blocks.push(el);
+  }
 
   for (let [event, callback] of Object.entries({
     'dragstart': handleDragStart,
@@ -23,12 +30,10 @@ directive('drag', (el, expression, attribute, x, component) => {
     'dragend': handleDragEnd,
     'mouseenter': handleMouseEnter,
     'mouseleave': handleMouseLeave,
+    'click': handleClick,
+    'contextmenu': handleContextMenu,
   })) {
     el.addEventListener(event, callback, false);
-  }
-
-  if (el.__x_block_id === '') {
-    dragElements.push(el);
   }
 
   /**
@@ -44,16 +49,17 @@ directive('drag', (el, expression, attribute, x, component) => {
       element.classList.add('editrix-container');
       element.setAttribute('x-drag', '');
 
-      element.draggable    = true;
-      element.innerHTML    = getTpl(el.__x_block_id);
-      element.__x_block_id = '';
+      element.draggable           = true;
+      element.innerHTML           = getTpl(el.__x_block_id);
+      element.__x_block_id        = '';
+      element.__x_parent_block_id = el.__x_block_id;
 
       element.addEventListener('mouseenter', handleMouseEnter);
       element.addEventListener('mouseleave', handleMouseLeave);
     }
 
     dragElement           = element;
-    dragElementStartIndex = dragElements.indexOf(element);
+    dragElementStartIndex = component.data.blocks.indexOf(element);
     dragElementBounds     = element.getBoundingClientRect();
 
     e.dataTransfer.effectAllowed = 'move';
@@ -72,19 +78,16 @@ directive('drag', (el, expression, attribute, x, component) => {
     if (e.preventDefault) {
       e.preventDefault(); // Necessary. Allows us to drop.
     }
+
     el.classList.add(draggingOverClass);
 
-    dragElementOverIndex = dragElements.indexOf(el);
+    dragElementOverIndex = component.data.blocks.indexOf(el);
 
     e.dataTransfer.dropEffect = 'move'; // See the section on the DataTransfer object.
 
     if (dragElementStartIndex !== null && dragElementOverIndex !== null) {
       el.classList.toggle(draggingTopClass, dragElementStartIndex > dragElementOverIndex);
       el.classList.toggle(draggingBottomClass, dragElementStartIndex < dragElementOverIndex);
-
-      if (dragElementStartIndex === dragElementOverIndex) {
-        el.classList.remove(draggingTopClass, draggingBottomClass);
-      }
     }
 
     return false;
@@ -113,13 +116,26 @@ directive('drag', (el, expression, attribute, x, component) => {
     if (dragElement !== null) {
       if (dragElement !== el) {
         dragElement.parentNode?.removeChild(dragElement);
-        const { top } = el.getBoundingClientRect(); // Destructuring assignment for cleaner code
+        const { top } = el.getBoundingClientRect();
 
         el.insertAdjacentElement(dragElementBounds.top > top ? 'beforebegin' : 'afterend', dragElement);
-      }
-      el.classList.remove(draggingStartClass, draggingOverClass, draggingTopClass, draggingBottomClass);
 
-      dragElement.classList.remove(draggingStartClass, draggingOverClass, draggingTopClass, draggingBottomClass);
+        if (dragElement.__x_parent_block_id !== '') {
+          addBlockAtIndex(
+            component.data.blocks,
+            dragElementOverIndex,
+            dragElement,
+            dragElementBounds.top > top
+          );
+          dragElement.__x_parent_block_id = '';
+        }
+        console.log(component.data.blocks)
+      }
+
+      const classesToRemove = [draggingStartClass, draggingOverClass, draggingTopClass, draggingBottomClass];
+
+      el.classList.remove(...classesToRemove);
+      dragElement.classList.remove(...classesToRemove);
     }
     return false;
   }
@@ -173,6 +189,17 @@ directive('drag', (el, expression, attribute, x, component) => {
       }
     }
   }
+
+  function handleClick() {
+    if (el.__x_block_id === '') {
+      component.data.section = 'content';
+    }
+  }
+
+  function handleContextMenu(e) {
+    e.preventDefault();
+    component.data.section = 'blocks';
+  }
 });
 
 /**
@@ -188,4 +215,24 @@ const getTpl = (element) => {
   }
 
   return tpl[element];
+}
+
+/**
+ * Adds a new element before or after the specified index in an array.
+ *
+ * @param {Array} array - The source array.
+ * @param {number} index - The index before or after which to add the element.
+ * @param {*} element - The new element to add to the array.
+ * @param {boolean} insertAfter - A flag indicating whether to add the element after the specified index. If false, the element will be added before the index.
+ * @returns {void}
+ */
+const addBlockAtIndex = (array, index, element, insertAfter) => {
+  // check if the index is within the array bounds
+  if (index >= 0 && index < array.length) {
+    // calculate the insert index based on whether to insert after or before the specified index
+    array.splice(insertAfter ? index + 1 : index, 0, element);
+  } else {
+    // if the index is out of bounds, simply add the element to the end
+    array.push(element);
+  }
 }
